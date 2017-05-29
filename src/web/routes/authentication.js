@@ -2,7 +2,7 @@ const crypt = require('./../../common/encrypt');
 const log = require('./../../log/logger');
 const config = require('./../../config/config');
 const express = require('express');
-const auth = require('basic-auth')
+const auth = require('basic-auth');
 const router = express.Router();
 
 /**
