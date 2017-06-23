@@ -2,61 +2,53 @@ const config = require('./../config/config');
 const log = require('./../log/logger');
 const crypto = require('crypto');
 
-const algorithm = config.encrypt.algorithm == null ? 'aes-256-ctr' : config.encrypt.algorithm;
-const privateKey = config.encrypt.key == null ? '1@3$5^7*9)-+' : config.encrypt.key;
-const hashAlgo = config.encrypt.hashalgo == null ? 'aes-256-ctr' : config.encrypt.hashalgo;
-const salt = config.encrypt.salt == null ? '1@3$5^7*9)-+' : config.encrypt.salt;
-const cipher = crypto.createCipher(algorithm, privateKey);
-const decipher = crypto.createDecipher(algorithm, privateKey);
+const UTF8 = 'utf8';
+const HEX = 'hex';
 
-log.debug('algorithm=' + algorithm + ' privateKey=' + privateKey + ' hashAlgo=' + hashAlgo + ' salt=' + salt);
-
-function decrypt(password) {
-  var decipher = crypto.createDecipher(algorithm, privateKey);
-  var dec = decipher.update(password, 'hex', 'utf8');
-  dec += decipher.final('utf8');
-  log.debug('text = ' + password + ' decrypt = ' + decrypt);
-  return dec;
+function Crypt() {
+    this.algorithm = config.encrypt.algorithm == null ? 'aes-256-ctr' : config.encrypt.algorithm;
+    this.privateKey = config.encrypt.key == null ? '1@3$5^7*9)-+' : config.encrypt.key;
+    this.hashAlgo = config.encrypt.hashalgo == null ? 'sha256' : config.encrypt.hashalgo;
+    this.salt = config.encrypt.salt == null ? '1@3$5^7*9)-+' : config.encrypt.salt;
+    log.debug('algorithm=' + this.algorithm + ' privateKey=' + this.privateKey + ' hashAlgo=' + this.hashAlgo + ' salt=' + this.salt);
 }
 
-function encrypt(password) {
-  var cipher = crypto.createCipher(algorithm, privateKey);
-  var crypted = cipher.update(password, 'utf8', 'hex');
-  crypted += cipher.final('hex');
-  log.debug('text = ' + password + ' crypted = ' + crypted);
-  return crypted;
-}
-
-module.exports = {
-  hashText: function hashText(text) {
-    var hash = crypto.createHash(hashAlgo).update(salt + text + salt).digest("hex");
-    log.debug('text = ' + text + ' salt = ' + salt + ' hash = ' + hash);
-    return hash;
-  },
-  /**
-   * Encrypt text, could be decryptex by decryptWithUserPwd
-   * @param  {[type]} plainText [description]
-   * @param  {[type]} pw        [description]
-   * @return {[type]}           [description]
-   */
-  ecryptWithUserPwd: function ecryptWithUserPwd(plainText, pw) {
-    var encryptedText = encrypt(plainText, pw);
-    var hash = hashText(encryptedText);
+Crypt.prototype.encryptText = function (plainText) {
+    var encryptedText = this.encrypt(plainText);
+    var hash = this.hashText(encryptedText);
     return encryptedText + "$" + hash;
-  },
-  /**
-   * decrypt text ecnrypted via ecryptWithUserPwd
-   * @param  {[type]} encryptedAndAuthenticatedText [description]
-   * @param  {[type]} pw                            [description]
-   * @return {[type]}                               [description]
-   */
-  decryptWithUserPwd: function decryptWithUserPwd(encryptedText, pw) {
+};
+
+Crypt.prototype.hashText = function (text) {
+    var hash = crypto.createHash(this.hashAlgo).update(this.salt + text + this.salt).digest(HEX);
+    log.debug('text = ' + text + ' salt = ' + this.salt + ' hash = ' + hash);
+    return hash;
+};
+
+Crypt.prototype.decryptText = function (encryptedText) {
     var encryptedAndHashArray = encryptedText.split("$");
     var encrypted = encryptedAndHashArray[0];
     var hash = encryptedAndHashArray[1];
-    var hash2Compare = hashText(encrypted);
+    var hash2Compare = this.hashText(encrypted);
     if (hash === hash2Compare) {
-      return decrypt(encrypted, pw);
+        return this.decrypt(encrypted);
     }
-  }
 };
+
+Crypt.prototype.decrypt = function (text) {
+    const decipher = crypto.createDecipher(this.algorithm, this.privateKey);
+    var dec = decipher.update(text, HEX, UTF8);
+    dec += decipher.final(UTF8);
+    log.debug('text = ' + text + ' decrypt = ' + dec);
+    return dec;
+}
+
+Crypt.prototype.encrypt = function (text) {
+    const cipher = crypto.createCipher(this.algorithm, this.privateKey);
+    var crypted = cipher.update(text, UTF8, HEX);
+    crypted += cipher.final(HEX);
+    log.debug('text = ' + text + ' crypted = ' + crypted);
+    return crypted;
+}
+
+module.exports = new Crypt();
