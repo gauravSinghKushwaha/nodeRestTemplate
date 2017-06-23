@@ -33,7 +33,7 @@ router.route('/authenticate').post(function (req, res) {
     log.debug('request body = ' + JSON.stringify(req.body));
     const hash = crypt.hashText(req.body.password);
     log.debug(hash);
-    function postArg() {
+    function postArg(username) {
         const args = {
             data: {
                 "schema": "river",
@@ -47,7 +47,7 @@ router.route('/authenticate').post(function (req, res) {
                     "resource"
                 ],
                 "where": {
-                    "username": "user1498213881"
+                    "username": username
                 },
                 "limit": 200
             },
@@ -58,7 +58,7 @@ router.route('/authenticate').post(function (req, res) {
         return args;
     }
 
-    restclient.postReq(null, config.psurl + 'search', postArg(), function (data, resp, error) {
+    restclient.postReq(null, config.psurl + 'search', postArg(req.body.username), function (data, resp, error) {
         if (error || error != null) {
             log.error(error);
             return res.status(500).send('something wrong at server')
@@ -68,7 +68,7 @@ router.route('/authenticate').post(function (req, res) {
             if (data.hasOwnProperty("error")) {
                 return res.send(data.error);
             } else {
-                return res.send(resp.headers.status);
+                return res.status(resp.statusCode).send({'error': 'could not fetch data from persistence server!!'});
             }
         } else {
             if (data && data.length == 1 && data[0].username == req.body.username && data[0].status == 'active' && data[0].domain == req.body.domain && data[0].password == hash) {
