@@ -3,13 +3,13 @@ const fs = require('fs');
 
 const UTF_8 = "utf8"
 const RES = '/resources';
-var configFile = process.argv[2];
+var configFile = process.argv[2] ? process.argv[2] : 'dev.properties';
 console.log(' configFile arg = ' + configFile);
 
 if (configFile != null && !path.isAbsolute(configFile)) {
-  configFile = path.resolve(__dirname + RES, configFile);
+    configFile = path.resolve(__dirname + RES, configFile);
 } else {
-  throw (new Error('could not readd properties file ' + configFile));
+    throw (new Error('could not readd properties file ' + configFile));
 }
 console.log(' reading config from = ' + configFile);
 

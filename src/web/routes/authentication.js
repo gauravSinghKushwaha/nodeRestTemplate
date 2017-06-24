@@ -6,11 +6,6 @@ const express = require('express');
 const auth = require('basic-auth');
 const router = express.Router();
 
-const UTF8 = 'utf8';
-const HEX = 'hex';
-const hashAlgo = config.encrypt.hashalgo == null ? 'sha256' : config.encrypt.hashalgo;
-const salt = config.encrypt.salt == null ? '1@3$5^7*9)-+' : config.encrypt.salt;
-
 /**
  * Middleware woudl be used for authentication
  * @param  {[type]}   req  [description]
@@ -43,13 +38,12 @@ router.route('/authenticate').post(function (req, res) {
                     "username",
                     "password",
                     "status",
-                    "domain",
-                    "resource"
+                    "domain"
                 ],
                 "where": {
                     "username": username
                 },
-                "limit": 200
+                "limit": 10
             },
             user: "river-ejab",
             password: "1@3$5^7*9)-+",
@@ -79,10 +73,6 @@ router.route('/authenticate').post(function (req, res) {
             }
         }
     });
-});
-
-router.route('/password').get(function (req, res) {
-    res.status(200).send('{password:password}');
 });
 
 /*
