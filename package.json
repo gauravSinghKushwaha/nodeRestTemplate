@@ -12,7 +12,7 @@
     "morgan": "1.8.1",
     "node-rest-client": "3.1.0",
     "rotating-file-stream": "1.2.2",
-    "simple-node-logger": "^0.93.24"
+    "simple-node-logger": "0.93.28"
   },
   "devDependencies": {},
   "scripts": {

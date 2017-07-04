@@ -9,11 +9,15 @@ const logFileName = config.logs.filename == null ? 'river-<DATE>.log' : config.l
 fs.existsSync(logDir) || fs.mkdirSync(logDir);
 
 const opts = {
-  //errorEventName: 'error',
-  logDirectory: logDir,
-  fileNamePattern: logFileName,
-  dateFormat: 'YYYY.MM.DD-HH'
+    logDirectory: logDir,
+    fileNamePattern: logFileName,
+    dateFormat: 'YYYY.MM.DD',//'YYYY.MM.DD-HH'
+    createInterval: function (cb) {
+        setInterval(cb, config.logs.rollinterval ? config.logs.rollinterval : 86400000);//milliseconds
+    }
 };
+
 const log = logger.createRollingFileLogger(opts);
 log.setLevel(config.logs.level);
+
 module.exports = log;

@@ -28,23 +28,12 @@ router.route('/authenticate').post(function (req, res) {
     log.debug('request body = ' + JSON.stringify(req.body));
     const hash = crypt.hashText(req.body.password);
     log.debug(hash);
-    function postArg(username) {
+
+    function arg(username) {
         const args = {
-            data: {
-                "schema": "river",
-                "table": "user",
-                "operation": "search",
-                "fields": [
-                    "username",
-                    "password",
-                    "status",
-                    "domain"
-                ],
-                "where": {
-                    "username": username
-                },
-                "limit": 10
-            },
+            path: {"username": username},
+            data: {},
+            parameters: {schema: "river", table: "user"},
             user: "river-ejab",
             password: "1@3$5^7*9)-+",
             headers: {"Content-Type": "application/json"}
@@ -52,7 +41,7 @@ router.route('/authenticate').post(function (req, res) {
         return args;
     }
 
-    restclient.postReq(null, config.psurl + 'search', postArg(req.body.username), function (data, resp, error) {
+    restclient.getReq(null, config.psurl, arg(req.body.username), function (data, resp, error) {
         if (error || error != null) {
             log.error(error);
             return res.status(500).send('something wrong at server')
@@ -75,48 +64,4 @@ router.route('/authenticate').post(function (req, res) {
     });
 });
 
-/*
- apiRoutes.post('/authenticate', function(req, res) {
-
- // find the user
- User.findOne({
- name: req.body.name
- }, function(err, user) {
-
- if (err) throw err;
-
- if (!user) {
- res.json({
- success: false,
- message: 'Authentication failed. User not found.'
- });
- } else if (user) {
-
- // check if password matches
- if (user.password != req.body.password) {
- res.json({
- success: false,
- message: 'Authentication failed. Wrong password.'
- });
- } else {
-
- // if user is found and password is right
- // create a token
- var token = jwt.sign(user, app.get('superSecret'), {
- expiresInMinutes: 1440 // expires in 24 hours
- });
-
- // return the information including token as JSON
- res.json({
- success: true,
- message: 'Enjoy your token!',
- token: token
- });
- }
-
- }
-
- });
- });
- */
 module.exports = router;
