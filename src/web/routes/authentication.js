@@ -32,15 +32,14 @@ router.route('/authenticate').post(function (req, res) {
     log.debug('request body = ' + JSON.stringify(body) + " schema = " + schema + " table = " + table + " hash = " + hash);
 
     function arg(username) {
-        const args = {
+        return {
             path: {"username": username},
             data: {},
             parameters: {schema: schema, table: table},
             user: config.restclient.user,
             password: config.restclient.password,
             headers: {"Content-Type": "application/json"}
-        };
-        return args;
+        }
     }
 
     restclient.getReq(undefined, config.psurl, arg(body.username), function (err, data, resp) {
@@ -48,7 +47,7 @@ router.route('/authenticate').post(function (req, res) {
             log.error(err);
             return res.status(500).send('something wrong at server');
         }
-        log.debug('response : ' + resp.statusCode);
+        log.debug('response statusCode : ' + resp.statusCode);
         if (resp.statusCode != 200) {
             if (data.hasOwnProperty("error")) {
                 return res.send(data.error);
