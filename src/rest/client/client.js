@@ -27,7 +27,7 @@ restClient.prototype.postReq = function (client, url, args, cb) {
         cl = client;
     }
     const req = cl.post(url, args, function (data, response) {
-        cb(null, data, response);
+        cb(undefined, data, response);
     }).on('error', function (err) {
         log.error('something went wrong on the request', err.request.options);
         cb(err);
@@ -53,10 +53,10 @@ restClient.prototype.getReq = function (client, url, args, cb) {
         cl = client;
     }
     const req = cl.get(url, args, function (data, response) {
-        cb(data, response, null);
+        cb(undefined, data, response);
     }).on('error', function (err) {
-        console.log('something went wrong on the request', err.request.options);
-        cb(null, null, err);
+        log.error('something went wrong on the request', err.request.options);
+        cb(err);
     });
 
     req.on('requestTimeout', function (req) {

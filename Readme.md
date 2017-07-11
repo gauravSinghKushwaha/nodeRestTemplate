@@ -1,4 +1,6 @@
-A nodejs express based rest module. With following feature
+                                            **Authentication Server**
+
+A NodeJs express based rest module. With following feature
 
 1) takes properties file as console input. you could give full path like d:\\abc\\xyz.properties Or only property file name like xyz.properties. In case of later it will look for file in resouces folder under config.
 2) run the sever using cluster module, creates logs.cluster.childprocess many child process for handling rest requests.
@@ -9,7 +11,7 @@ A nodejs express based rest module. With following feature
 7) all the routes are mentioned in routes folder
 8) server running port could be changed from config along with api's versioning
 
-Usage :
+**Usage :**
 
 1)
 
@@ -26,12 +28,3 @@ Postman-Token: c57caa30-c930-4e36-8e8b-21d2d88718b1
  "domain": "river",
  "resource": "Resource"
 }
-
-2)
-
-GET /river/v1/password HTTP/1.1
-Host: localhost:9090
-Content-Type: application/json
-Authorization: Basic cml2ZXItZWphYjoxQDMkNV43KjkpLSs=
-Cache-Control: no-cache
-Postman-Token: 1a0a293a-4ace-44f5-8d60-341aac1dbfa3

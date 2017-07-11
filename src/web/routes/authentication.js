@@ -25,28 +25,30 @@ router.use(function timeLog(req, res, next) {
 });
 
 router.route('/authenticate').post(function (req, res) {
-    log.debug('request body = ' + JSON.stringify(req.body));
-    const hash = crypt.hashText(req.body.password);
-    log.debug(hash);
+    const body = req.body;
+    const schema = config.db.schema;
+    const table = config.db.table;
+    const hash = crypt.hashText(body.password);
+    log.debug('request body = ' + JSON.stringify(body) + " schema = " + schema + " table = " + table + " hash = " + hash);
 
     function arg(username) {
         const args = {
             path: {"username": username},
             data: {},
-            parameters: {schema: "river", table: "user"},
-            user: "river-ejab",
-            password: "1@3$5^7*9)-+",
+            parameters: {schema: schema, table: table},
+            user: config.restclient.user,
+            password: config.restclient.password,
             headers: {"Content-Type": "application/json"}
         };
         return args;
     }
 
-    restclient.getReq(null, config.psurl, arg(req.body.username), function (data, resp, error) {
-        if (error || error != null) {
-            log.error(error);
-            return res.status(500).send('something wrong at server')
+    restclient.getReq(undefined, config.psurl, arg(body.username), function (err, data, resp) {
+        if (err) {
+            log.error(err);
+            return res.status(500).send('something wrong at server');
         }
-        log.debug('response : ' + resp.statusCode + ' Data : ' + JSON.stringify(data));
+        log.debug('response : ' + resp.statusCode);
         if (resp.statusCode != 200) {
             if (data.hasOwnProperty("error")) {
                 return res.send(data.error);
