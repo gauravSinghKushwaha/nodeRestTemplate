@@ -5,7 +5,8 @@ const restclient = require('./../../rest/client/client');
 const express = require('express');
 const auth = require('basic-auth');
 const router = express.Router();
-
+const ACTIVE = 'active';
+const CONTENT_TYPE_JSON = "application/json";
 /**
  * Middleware woudl be used for authentication
  * @param  {[type]}   req  [description]
@@ -26,19 +27,16 @@ router.use(function timeLog(req, res, next) {
 
 router.route('/authenticate').post(function (req, res) {
     const body = req.body;
-    const schema = config.db.schema;
-    const table = config.db.table;
-    const hash = crypt.hashText(body.password);
-    log.debug('request body = ' + JSON.stringify(body) + " schema = " + schema + " table = " + table + " hash = " + hash);
+    log.debug('request body = ' + JSON.stringify(body));
 
     function arg(username) {
         return {
             path: {"username": username},
             data: {},
-            parameters: {schema: schema, table: table},
+            parameters: {},
             user: config.restclient.user,
             password: config.restclient.password,
-            headers: {"Content-Type": "application/json"}
+            headers: {"Content-Type": CONTENT_TYPE_JSON}
         }
     }
 
@@ -49,13 +47,10 @@ router.route('/authenticate').post(function (req, res) {
         }
         log.debug('response statusCode : ' + resp.statusCode);
         if (resp.statusCode != 200) {
-            if (data.hasOwnProperty("error")) {
-                return res.send(data.error);
-            } else {
-                return res.status(resp.statusCode).send({error: 'could not fetch data from persistence server!!'});
-            }
+            log.error('Status code = ' + resp.statusCode + ' data = ' + data);
+            return res.status(resp.statusCode).send(( data && (Object.keys(data)).length > 0) ? data : {error: 'could not get user from server!!'});
         } else {
-            if (data && data.length == 1 && data[0].username == req.body.username && data[0].status == 'active' && data[0].domain == req.body.domain && data[0].password == hash) {
+            if (data && data.length == 1 && data[0].username == req.body.username && data[0].status == ACTIVE && data[0].domain == req.body.domain && data[0].password == body.password) {
                 return res.status(200).send({success: true});
             } else {
                 log.debug('authentication failed');
