@@ -27,20 +27,24 @@ router.use(function timeLog(req, res, next) {
 
 router.route('/authenticate').post(function (req, res) {
     const body = req.body;
+    const reqUserName = body.username;
+    const reqPassword = body.password;
     log.debug('request body = ' + JSON.stringify(body));
 
-    function arg(username) {
+    function arg() {
+        const auth = "Basic " + new Buffer(reqUserName + ":" + reqPassword).toString("base64");
         return {
-            path: {"username": username},
+            path: {"username": reqUserName},
             data: {},
             parameters: {},
-            user: config.restclient.user,
-            password: config.restclient.password,
-            headers: {"Content-Type": CONTENT_TYPE_JSON}
+            headers: {
+                "Content-Type": CONTENT_TYPE_JSON,
+                "Authorization": auth
+            }
         }
     }
 
-    restclient.getReq(undefined, config.psurl, arg(body.username), function (err, data, resp) {
+    restclient.getReq(undefined, config.psurl, arg(), function (err, data, resp) {
         if (err) {
             log.error(err);
             return res.status(500).send({error: 'something gone wrong at server'});
@@ -50,7 +54,7 @@ router.route('/authenticate').post(function (req, res) {
             log.error('Status code = ' + resp.statusCode + ' data = ' + data);
             return res.status(resp.statusCode).send(( data && (Object.keys(data)).length > 0) ? data : {error: 'could not get user from server!!'});
         } else {
-            if (data && data.length == 1 && data[0].username == req.body.username && data[0].status == ACTIVE && data[0].domain == req.body.domain && data[0].password == body.password) {
+            if (data && data.length == 1 && data[0].username == reqUserName && data[0].status == ACTIVE && data[0].domain == body.domain && data[0].password == reqPassword) {
                 return res.status(200).send({success: true});
             } else {
                 log.debug('authentication failed');
