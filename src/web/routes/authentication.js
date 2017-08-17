@@ -16,6 +16,7 @@ const CONTENT_TYPE_JSON = "application/json";
  */
 router.use(function timeLog(req, res, next) {
     var credentials = auth(req);
+    log.debug('credentials received :: ' + JSON.stringify(credentials) + ' credentials required :: ' + JSON.stringify(config.apiauth));
     if (!credentials || credentials.name != config.apiauth.user || credentials.pass != config.apiauth.pwd) {
         log.warn('basic auth failed, access denied for api . credentials = ' + credentials);
         res.status(401);
